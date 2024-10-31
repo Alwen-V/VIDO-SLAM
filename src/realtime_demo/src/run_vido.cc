@@ -189,6 +189,7 @@ void RunNet(cv::Mat &image, double &img_time, std::string &img_name, ros::NodeHa
     input_mutex_.unlock();
 
     previous_image_ = current_image_;
+    // update
   }
 }
 
