@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/home/alwen/anaconda3/envs/cuda111/bin/python
 from __future__ import absolute_import, division, print_function
 
 import os
@@ -26,11 +26,11 @@ from std_msgs.msg import String
 from sensor_msgs.msg import Image
 
 from mono_depth2.srv import MonoDepth, MonoDepthResponse
-sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages') 
+#sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages') 
 import cv2
 import time
 import rospkg
-sys.path.append('/opt/ros/kinetic/lib/python2.7/dist-packages') 
+#sys.path.append('/opt/ros/kinetic/lib/python2.7/dist-packages') 
 import rospy
 import ros_numpy
 

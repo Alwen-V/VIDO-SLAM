@@ -27,7 +27,8 @@ import PIL.Image
 
 
 class FlowNetRos():
-    def __init__(self, model_path= os.path.dirname(__file__) +"/models/network-default.pytorch"):
+    # def __init__(self, model_path= os.path.dirname(__file__) +"/models/network-default.pytorch"):
+    def __init__(self, model_path= os.path.dirname(__file__) +"/models/kitti.pytorch"):    
         #RosCppCommunicator.__init__(self)
         self.model_path = model_path
        

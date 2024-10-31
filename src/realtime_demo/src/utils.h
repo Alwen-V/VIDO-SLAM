@@ -5,6 +5,7 @@ enum SystemMode { VO = 0, VIO };
 struct Parameters {
   SystemMode slam_mode_;
   int start_image_index_;
+  int end_image_index_;
   std::string img_path_;
   std::string imu_path_;
   std::string pose_log_path_;

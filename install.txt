@@ -1,0 +1,13 @@
+pip install empy 
+pip install pyyaml
+安装cv2:pip install opencv-contrib-python 
+pip install rospkg   
+pip install matplotlib
+pip install yacs
+pip uninstall numpy       pip install -U numpy==1.23.5
+pip install memory_profiler
+pip install path
+pip install imgaug
+比如我电脑上是cuda10.0 我就选 cupy-cuda100.如果cuda9.0 我就选 cupy-cuda90      pip install cupy-cuda100
+
+pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation --config-settings "--global-option=--cpp_ext" --config-settings "--global-option=--cuda_ext" ./

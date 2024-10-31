@@ -13,7 +13,7 @@
 #include<string>
 #include<thread>
 #include <memory>
-#include<opencv2/core/core.hpp>
+#include <opencv2/core/core.hpp>
 #include "Tracking.h"
 #include "Map.h"
 #include "ImuTypes.h"
@@ -82,7 +82,10 @@ public:
     };
 
 public:
-    System(){};
+    // System(const string &strSettingsFile, const eSensor sensor);
+    System(){};      
+    void myRun();   
+
     // Initialize the SLAM system.
     void Init(const string &strSettingsFile, const eSensor sensor);
 

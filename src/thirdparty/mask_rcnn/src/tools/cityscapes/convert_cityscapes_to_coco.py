@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/home/alwen/anaconda3/envs/cuda111/bin/python
+#/usr/bin/env python
 
 # Copyright (c) 2017-present, Facebook, Inc.
 #

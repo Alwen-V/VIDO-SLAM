@@ -1,6 +1,6 @@
 <launch>
-    <arg name="config_path" default = "$(find demo)/../config/kaist_config.yaml" />
-    <arg name="model_path" default="$(find demo)/urdf/lexus.urdf" />
+    <arg name="config_path" default = "/home/alwen/slam_source_code/VIDO-SLAM/src/config/kitti_config.yaml" />
+    <arg name="model_path" default="/home/alwen/slam_source_code/VIDO-SLAM/src/realtime_demo/urdf/lexus.urdf" />
     <param name="robot_description" textfile="$(arg model_path)" />
     <param name="frame_id" value="vido_camera_link" />
     <node name="demo" pkg="demo" type="demo" output="screen" />

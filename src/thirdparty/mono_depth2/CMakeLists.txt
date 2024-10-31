@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(mono_depth2)
 
+# set(Torch_DIR /home/alwen/anaconda3/envs/slam/lib/python3.7/site-packages/torch/share/cmake/Torch)
+# find_package(Torch REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   actionlib
   actionlib_msgs
@@ -18,6 +20,8 @@ catkin_python_setup()
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  # ${Torch_INSTALL_INCLUDE}
+  # ${Torch_DIR}
 )
 
 

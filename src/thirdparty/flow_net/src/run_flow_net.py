@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/home/alwen/anaconda3/envs/cuda111/bin/python
 import time
 import os
 import struct
@@ -25,12 +25,13 @@ from layers import Network
 from flow_net.srv import FlowNet, FlowNetResponse
 sys.path.append("../"+os.path.dirname(__file__))
 
-sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages') 
+#sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages') 
 import cv2
 
 
 class FlowNetRos():
-    def __init__(self, model_path= os.path.dirname(__file__) +"/models/network-default.pytorch"):
+    # def __init__(self, model_path= os.path.dirname(__file__) +"/models/network-default.pytorch"):
+    def __init__(self, model_path= os.path.dirname(__file__) +"/models/network-kitti.pytorch"):
         #RosCppCommunicator.__init__(self)
        
         self.model_path = model_path

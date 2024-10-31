@@ -1,8 +1,8 @@
-#!/usr/bin/python
+#!/home/alwen/anaconda3/envs/cuda111/bin/python
 import sys
-sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
+#sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
 import cv2
-sys.path.append('/opt/ros/kinetic/lib/python2.7/dist-packages') 
+#sys.path.append('/opt/ros/kinetic/lib/python2.7/dist-packages') 
 import os
 sys.path.append("../"+os.path.dirname(__file__))
 from maskrcnn_benchmark.config import cfg

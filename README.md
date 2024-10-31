@@ -91,3 +91,5 @@ The VO and VIO switch options are in the config file:
 ### 6. TODO
 
 Visual-Inertial optimization
+
+#!/usr/bin/python3

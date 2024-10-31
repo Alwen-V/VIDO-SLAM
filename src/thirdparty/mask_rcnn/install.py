@@ -1,5 +1,6 @@
+#!/home/alwen/anaconda3/envs/cuda111/bin/python
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-#!/usr/bin/env python
+
 
 import glob
 import os
@@ -24,12 +25,13 @@ def get_extensions():
 
     sources = main_file + source_cpu
     extension = CppExtension
-    print("cuda home " + CUDA_HOME)
+    #print("cuda home " + CUDA_HOME)
 
     extra_compile_args = {"cxx": []}
     define_macros = []
 
     if (torch.cuda.is_available() and CUDA_HOME is not None) or os.getenv("FORCE_CUDA", "0") == "1":
+    
         extension = CUDAExtension
         sources += source_cuda
         define_macros += [("WITH_CUDA", None)]

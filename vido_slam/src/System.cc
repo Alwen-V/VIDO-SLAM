@@ -20,6 +20,42 @@ namespace VIDO_SLAM
 
 Verbose::eLevel Verbose::th = Verbose::VERBOSITY_NORMAL;
 
+// System::System(const string &strSettingsFile, const eSensor sensor)
+// {
+//     // ===== output welcome message ======
+//     cout << endl << 
+//     " --------------------" << endl <<
+//     "|  START VIDO-SLAM_system   |" << endl<<
+//     " --------------------" << endl;
+//     mSensor = sensor;
+//     // Check settings file
+//     cv::FileStorage fsSettings(strSettingsFile.c_str(), cv::FileStorage::READ);
+//     if(!fsSettings.isOpened())
+//     {
+//        cerr << "Failed to open settings file at: " << strSettingsFile << endl;
+//        exit(-1);
+//     }
+
+//     //Create the Map
+//     mpMap = new Map();
+     
+//     Verbose::SetTh(Verbose::VERBOSITY_NORMAL);
+
+//     //Initialize the Tracking thread
+//     //(it will live in the main thread of execution, the one that called this constructor)
+//     mpTracker = new Tracking(this, mpMap, strSettingsFile, mSensor);
+
+
+// }
+void System::myRun()
+{
+        cout << endl << 
+    " --------------------" << endl <<
+    "|  START VIDO-SLAM   |" << endl<<
+    " --------------------" << endl;
+  
+}
+
 void System::Init(const string &strSettingsFile, const eSensor sensor)
 {
     // ===== output welcome message ======

@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(demo)
-
+SET(CMAKE_BUILD_TYPE "Debug")
+# set(cv_bridge_DIR /home/alwen/thrid_party/vision_opencv/cv_bridge/cv_bridge_install/share/cv_bridge/cmake)
+# find_package(cv_bridge)
 
 find_package(catkin REQUIRED COMPONENTS
 	rosbag
@@ -18,7 +20,9 @@ find_package(catkin REQUIRED COMPONENTS
 	nav_msgs
 	sensor_msgs)
 
-find_package(OpenCV 3.4.4 REQUIRED)
+set(OpenCV_DIR /home/alwen/thrid_party/opencv-3.4.0/build)
+find_package(OpenCV 3 REQUIRED)
+
 find_package(Pangolin REQUIRED)
 catkin_package(
   LIBRARIES ${PROJECT_NAME}
@@ -41,6 +45,7 @@ catkin_package(
 
 include_directories(
     ${catkin_INCLUDE_DIRS}
+	# ${cv_bridge_INCLUDE_DIRS}
 	${OpenCV_INCLUDE_DIRS}
 	${PROJECT_SOURCE_DIR}/../../vido_slam/include/
 )
@@ -48,13 +53,15 @@ include_directories(
 
 add_executable(${PROJECT_NAME}
 		  src/run_vido.cc
-		  src/utils.cc
+		  
+		 
            )
 
 
 
 target_link_libraries(${PROJECT_NAME}
 		${catkin_LIBRARIES}
+		# ${cv_bridge_LIBRARIES}
 		${OpenCV_LIBRARIES}
 		${Pangolin_LIBRARIES}
 		${PROJECT_SOURCE_DIR}/../../vido_slam/lib/libvido_slam.so
