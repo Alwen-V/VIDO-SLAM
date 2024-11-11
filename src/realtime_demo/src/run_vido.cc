@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <boost/bind.hpp>
 #include <opencv2/opencv.hpp>
-#include "/home/alwen/slam_source_code/VIDO-SLAM/vido_slam/demo/utils.h"
+#include "utils.h"
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/Image.h>
 #include <flow_net/FlowNet.h>
@@ -50,8 +50,9 @@ ros::ServiceClient mask_rcnn_client_;
 ros::ServiceClient mono_depth_client_;
 std::queue<std::shared_ptr<VidoSlamInput>> vido_input_;
 std::mutex input_mutex_;
-std::unique_ptr<VIDO_SLAM::System> vido_system_;
-cv::Mat image_trajectory = cv::Mat::zeros(800, 600, CV_8UC3);
+std::unique_ptr<VIDO_SLAM::System> vido_system_ = std::make_unique<VIDO_SLAM::System>();
+// cv::Mat image_trajectory = cv::Mat::zeros(800, 600, CV_8UC3);
+cv::Mat image_trajectory(1000, 1000, CV_8UC3, cv::Scalar(255, 255, 255));
 std::vector<std::string> mask_rcnn_labels;
 std::vector<int> mask_rcnn_label_indexs;
 
@@ -117,7 +118,7 @@ bool CallMaskNet(cv::Mat &current_image, cv::Mat &mask_image, ros::NodeHandle &n
   }
 }
 
-bool CallFlowNet(cv::Mat &current_image, cv::Mat &previous_image, cv::Mat &flow_image, ros::NodeHandle &nh_)
+bool CallFlowNet(cv::Mat &current_image, cv::Mat &previous_image, cv::Mat &scene_flow_image_, ros::NodeHandle &nh_)
 {
   sensor_msgs::ImagePtr current_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", current_image).toImageMsg();
   sensor_msgs::ImagePtr previous_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", previous_image).toImageMsg();
@@ -148,6 +149,14 @@ bool CallFlowNet(cv::Mat &current_image, cv::Mat &previous_image, cv::Mat &flow_
 
 void RunNet(cv::Mat &image, double &img_time, std::string &img_name, ros::NodeHandle &nh)
 {
+  ROS_INFO_STREAM("img_time: " << std::fixed << img_time);
+  ROS_INFO_STREAM("img_name: " << img_name);
+  if (image.empty())
+  {
+    ROS_ERROR_STREAM("Image is empty: " << img_name);
+    return;
+  }
+
   if (is_first_)
   {
     previous_image_ = image;
@@ -160,28 +169,28 @@ void RunNet(cv::Mat &image, double &img_time, std::string &img_name, ros::NodeHa
 
     // flow net
     flow_net_client_ = nh.serviceClient<flow_net::FlowNet>("FlowNetService");
-    ros::service::waitForService("FlowNetService");
+    ros::service::waitForService("FlowNetService", ros::Duration(1.0));
     if (!CallFlowNet(current_image_, previous_image_, scene_flow_image_, nh))
       ROS_WARN_STREAM("Could not return flow images");
 
     // mask rcnn
     mask_rcnn_client_ = nh.serviceClient<mask_rcnn::MaskRcnn>("MaskRcnnService");
-    ros::service::waitForService("MaskRcnnService");
+    ros::service::waitForService("MaskRcnnService", ros::Duration(1.0));
     if (!CallMaskNet(current_image_, mask_image_, nh))
       ROS_WARN_STREAM("Could not return mask rcnn images");
 
     // monodepth2
     mono_depth_client_ = nh.serviceClient<mono_depth2::MonoDepth>("MonoDepthService");
-    ros::service::waitForService("MonoDepthService");
+    ros::service::waitForService("MonoDepthService", ros::Duration(1.0));
     if (!CallDepthNet(current_image_, depth_image_, nh))
       ROS_WARN_STREAM("Could not return monodepth2 images");
 
-    //  std::string flow_path="/home/alwen/slam_source_code/VIDO-SLAM/save_dir/flow_image/";
-    //  cv::writeOpticalFlow(flow_path+img_name.substr(0,19)+".flo", scene_flow_image_);
+    // std::string flow_path = "/home/alwen/slam_source_code/VIDO-SLAM/save_dir/flow_image/";
+    // cv::writeOpticalFlow(flow_path + img_name.substr(0, 19) + ".flo", scene_flow_image_);
 
-    //  cv::imwrite(flow_path+"../depth_image/"+img_name.substr(0,19)+".png",depth_image_);
+    // cv::imwrite(flow_path + "../depth_image/" + img_name.substr(0, 19) + ".png", depth_image_);
 
-    //  cv::imwrite(flow_path+"../mask_image/"+img_name.substr(0,19)+".png",mask_image_);
+    // cv::imwrite(flow_path + "../mask_image/" + img_name.substr(0, 19) + ".png", mask_image_);
 
     auto input = std::make_shared<VidoSlamInput>(image, scene_flow_image_, depth_image_, mask_image_, img_time);
     input_mutex_.lock();
@@ -189,7 +198,6 @@ void RunNet(cv::Mat &image, double &img_time, std::string &img_name, ros::NodeHa
     input_mutex_.unlock();
 
     previous_image_ = current_image_;
-    // update
   }
 }
 
@@ -254,34 +262,19 @@ void RunVidoSlam(ros::NodeHandle &n)
     input = vido_input_.front();
     vido_input_.pop();
     input_mutex_.unlock();
-    ROS_INFO_STREAM("This is an info message3:!vido_input_.empty() is true!!");
-
-    cv::Mat pose = vido_system_->TrackRGBD(input->raw, input->depth,
-                                           input->flow,
-                                           input->mask,
-                                           input->ground_truth,
-                                           input->object_pose_gt,
-                                           input->image_time,
-                                           image_trajectory, 20);
+    if (!input->raw.empty() && !input->depth.empty() && !input->flow.empty() && !input->mask.empty())
+    {
+      ROS_WARN_STREAM("depth flow mask is not empty1");
+      cv::Mat pose = vido_system_->TrackRGBD(input->raw, input->depth, input->flow, input->mask, input->ground_truth, /* input->object_pose_gt, */ input->image_time, image_trajectory, 20);
+      ROS_WARN_STREAM("depth flow mask is not empty2");
+    }
+    else
+    {
+      ROS_WARN_STREAM("input is partyly empty");
+    }
   }
   // }
 }
-
-// Config::Config(const std::string &config_file_path)
-// {
-//   cv::FileStorage fsSettings(config_file_path, cv::FileStorage::READ);
-//   if (!fsSettings.isOpened())
-//   {
-//     std::cerr << "ERROR: Wrong path to settings" << std::endl;
-//   }
-
-//   fsSettings["image_path"] >> parameters_.img_path_;
-//   fsSettings["imu_path"] >> parameters_.imu_path_;
-//   parameters_.start_image_index_ = static_cast<int>(fsSettings["start_index"]);
-//   parameters_.end_image_index_ = static_cast<int>(fsSettings["end_index"]);
-//   parameters_.slam_mode_ = ((static_cast<int>(fsSettings["slam_mode"])) == 0) ? SystemMode::VO : SystemMode::VIO;
-//   fsSettings.release();
-// }
 
 int main(int argc, char **argv)
 {
@@ -312,50 +305,73 @@ int main(int argc, char **argv)
   if (n.getParam("config_file", config_file))
   {
     ROS_INFO_STREAM("Loaded " << "config_file" << ": " << config_file);
+    std::cout << "config_file: " << config_file << std::endl;
   }
   else
   {
     ROS_ERROR_STREAM("Failed to load " << "config_file");
     n.shutdown();
-  };
+    return -1;
+  }
 
-  // // //  vido_system_ = std::make_unique<VIDO_SLAM::System>(config_file,VIDO_SLAM::System::RGBD);
-  // VIDO_SLAM::System vido_system_;
-  // VIDO_SLAM::System::eSensor sensor_type = VIDO_SLAM::System::RGBD;
+  /*   // // //  vido_system_ = std::make_unique<VIDO_SLAM::System>(config_file,VIDO_SLAM::System::RGBD);
+    // VIDO_SLAM::System vido_system_;
+    // VIDO_SLAM::System::eSensor sensor_type = VIDO_SLAM::System::RGBD;
 
-  // std::cout << vido_system_.MONOCULAR << std::endl;
-  // //  vido_system_.Init(config_file, sensor_type);
-  // vido_system_.myRun();
-  // // vido_system_ = std::make_unique<VIDO_SLAM::System>(vido_system);
+    // std::cout << vido_system_.MONOCULAR << std::endl;
+    // //  vido_system_.Init(config_file, sensor_type);
+    // vido_system_.myRun();
+    // // vido_system_ = std::make_unique<VIDO_SLAM::System>(vido_system);
 
-  // //  vido_system_ = std::make_unique<VIDO_SLAM::System>();
-  // // //  vido_system_->myRun();
-  // //  vido_system_.Init(config_file,VIDO_SLAM::System::RGBD);
-  // // // std::thread vido_thread(RunVidoSlam,n);
-  // //  vido_system_.myRun();
+    //  vido_system_ = std::make_unique<VIDO_SLAM::System>();
+    // //  vido_system_->myRun();
+    //  vido_system_.Init(config_file,VIDO_SLAM::System::RGBD);
+    // // std::thread vido_thread(RunVidoSlam,n);
+    //  vido_system_.myRun();
 
-  // // ROS_INFO_STREAM("system just init");
-  // // std::cout << "system just init" << std::endl;
+    // ROS_INFO_STREAM("system just init");
+    // std::cout << "system just init" << std::endl; */
 
   auto cfg = std::make_shared<Config>(config_file);
   std::vector<std::string> images_names;
   std::vector<double> times;
-  LoadKittiImg(cfg->parameters_.img_path_, images_names, times);
+  LoadKaistImg(cfg->parameters_.img_path_, images_names, times);
 
-  VIDO_SLAM::System vido_system_vo2;
-  vido_system_vo2.Init(config_file, VIDO_SLAM::System::RGBD);
+  // VIDO_SLAM::System vido_system_vo2;
+  // vido_system_vo2.Init(config_file, VIDO_SLAM::System::RGBD);
+  vido_system_->Init(config_file, VIDO_SLAM::System::RGBD);
 
-  for (int idx = cfg->parameters_.start_image_index_; idx < 3; ++idx)
-  { // times.size()  cfg->parameters_.end_image_index_
+  for (int idx = cfg->parameters_.start_image_index_; idx < times.size(); ++idx)
+  {
     std::cout << "\n ............processing image idx -----> " << idx << "...............\n"
               << std::endl;
     cv::Mat raw_img = cv::imread(cfg->parameters_.img_path_ + "/" + images_names[idx],
                                  cv::IMREAD_UNCHANGED);
+    if (raw_img.empty())
+    {
+      std::cerr << "图像加载失败，无法找到图像：" << cfg->parameters_.img_path_ + "/" + images_names[idx] << std::endl;
+      continue; // 跳过当前循环
+    }
     cv::Mat bgr_img;
-    cv::resize(raw_img, bgr_img, cv::Size(640, 192));
-    //   cv::cvtColor(raw_img,bgr_img,cv::COLOR_BayerRG2BGR);
-    //   cv::resize(bgr_img,bgr_img,cv::Size(640,192));
+    if (raw_img.channels() == 1)
+    {
+      cv::cvtColor(raw_img, bgr_img, cv::COLOR_GRAY2BGR);
+    }
+    else if (raw_img.channels() == 3)
+    {
+      cv::cvtColor(raw_img, bgr_img, cv::COLOR_BayerRG2BGR);
+    }
+    // std::cout << "原始图像尺寸：" << bgr_img.cols << " x " << bgr_img.rows << std::endl;
+    // if (bgr_img.empty() || bgr_img.cols <= 0 || bgr_img.rows <= 0)
+    // {
+    //   std::cerr << "图像为空或尺寸无效！" << std::endl;
+    //   continue;
+    // }
+    cv::resize(bgr_img, bgr_img, cv::Size(640, 192));
+    // std::cout << "resize后图像尺寸:" << bgr_img.cols << " x " << bgr_img.rows << std::endl;
+
     RunNet(bgr_img, times[idx], images_names[idx], n);
+
     RunVidoSlam(n);
   }
   ros::spin();

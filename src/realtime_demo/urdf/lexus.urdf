@@ -4,7 +4,8 @@
     <visual name="base_visual">
       <origin xyz="0.0 0.0 0.0" rpy="1.57 0 -1.57" />
       <geometry>
-        <mesh filename="package://demo/mesh/lexus.dae" scale="1.0 1.0 1.0"/>
+        <!-- <mesh filename="package://demo/mesh/lexus.dae" scale="1.0 1.0 1.0"/> -->
+        <mesh filename="/home/alwen/slam_source_code/VIDO-SLAM/src/realtime_demo/mesh/lexus.dae" scale="1.0 1.0 1.0"/>
       </geometry>
     </visual>
   </link>
